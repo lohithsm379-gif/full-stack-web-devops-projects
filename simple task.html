@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple To-Do List</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f0f2f5;
+    margin:0;
+}
+.container{
+    width:90%;
+    max-width:700px;
+    margin:30px auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+h1,h2{
+    text-align:center;
+}
+input,textarea{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    margin:5px;
+}
+.login-btn,.add-btn{
+    background:#007bff;
+    color:white;
+}
+.complete{
+    background:green;
+    color:white;
+}
+.edit{
+    background:orange;
+    color:white;
+}
+.delete{
+    background:red;
+    color:white;
+}
+.logout{
+    background:black;
+    color:white;
+    float:right;
+}
+.task{
+    border:1px solid #ddd;
+    padding:10px;
+    margin:10px 0;
+    border-radius:5px;
+}
+.hidden{
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="loginPage">
+<h1>Login</h1>
+
+<input type="text" id="username" placeholder="Username or Email">
+
+<input type="password" id="password" placeholder="Password">
+
+<button class="login-btn" onclick="login()">Login</button>
+
+</div>
+
+<div class="container hidden" id="todoPage">
+
+<button class="logout" onclick="logout()">Logout</button>
+
+<h1>To-Do List</h1>
+
+<input type="text" id="title" placeholder="Task Title">
+
+<textarea id="description" placeholder="Task Description (Optional)"></textarea>
+
+<button class="add-btn" onclick="addTask()">Add Task</button>
+
+<h2>Pending Tasks</h2>
+
+<div id="pending"></div>
+
+<h2>Completed Tasks</h2>
+
+<div id="completed"></div>
+
+</div>
+
+<script>
+
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+
+function login(){
+
+let user=document.getElementById("username").value;
+
+let pass=document.getElementById("password").value;
+
+if(user!="" && pass!=""){
+
+localStorage.setItem("loggedIn","true");
+
+document.getElementById("loginPage").classList.add("hidden");
+
+document.getElementById("todoPage").classList.remove("hidden");
+
+displayTasks();
+
+}else{
+
+alert("Enter Username and Password");
+
+}
+
+}
+
+function logout(){
+
+localStorage.removeItem("loggedIn");
+
+location.reload();
+
+}
+
+if(localStorage.getItem("loggedIn")){
+
+document.getElementById("loginPage").classList.add("hidden");
+
+document.getElementById("todoPage").classList.remove("hidden");
+
+displayTasks();
+
+}
+
+function addTask(){
+
+let title=document.getElementById("title").value;
+
+let desc=document.getElementById("description").value;
+
+if(title==""){
+
+alert("Task Title Required");
+
+return;
+
+}
+
+tasks.push({
+
+title:title,
+
+desc:desc,
+
+completed:false
+
+});
+
+saveTasks();
+
+document.getElementById("title").value="";
+
+document.getElementById("description").value="";
+
+}
+
+function saveTasks(){
+
+localStorage.setItem("tasks",JSON.stringify(tasks));
+
+displayTasks();
+
+}
+
+function displayTasks(){
+
+let pending=document.getElementById("pending");
+
+let completed=document.getElementById("completed");
+
+pending.innerHTML="";
+
+completed.innerHTML="";
+
+tasks.forEach((task,index)=>{
+
+let div=document.createElement("div");
+
+div.className="task";
+
+div.innerHTML=`
+<h3>${task.title}</h3>
+<p>${task.desc}</p>
+
+<button class="complete" onclick="toggleTask(${index})">
+${task.completed?"Undo":"Complete"}
+</button>
+
+<button class="edit" onclick="editTask(${index})">
+Edit
+</button>
+
+<button class="delete" onclick="deleteTask(${index})">
+Delete
+</button>
+`;
+
+if(task.completed)
+
+completed.appendChild(div);
+
+else
+
+pending.appendChild(div);
+
+});
+
+}
+
+function toggleTask(index){
+
+tasks[index].completed=!tasks[index].completed;
+
+saveTasks();
+
+}
+
+function deleteTask(index){
+
+tasks.splice(index,1);
+
+saveTasks();
+
+}
+
+function editTask(index){
+
+let newTitle=prompt("Edit Title",tasks[index].title);
+
+if(newTitle!=null){
+
+let newDesc=prompt("Edit Description",tasks[index].desc);
+
+tasks[index].title=newTitle;
+
+tasks[index].desc=newDesc;
+
+saveTasks();
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
